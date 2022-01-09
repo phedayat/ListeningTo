@@ -1,3 +1,3 @@
 window.addEventListener('DOMContentLoaded', (e) => {
-	document.write("Hello!");
-})
+	document.getElementById('test').innerHTML = 'Some new text I added';
+});
