@@ -4,5 +4,5 @@ window.addEventListener('DOMContentLoaded', (e) => {
 
 let button = document.getElementsByName('login')[0];
 button.addEventListener('click', (e) => {
-	document.getElementById('test').innerHTML = 'Changed the text!';
+	let loginModal = document.getElementById('login-modal');
 });
