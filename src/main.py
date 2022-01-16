@@ -1,6 +1,14 @@
-from flask import Flask, render_template, request, redirect
-from src.redis_client import RedisClient
 import json
+import os
+from src.redis_client import RedisClient
+from flask import (
+	Flask, 
+	render_template, 
+	request, 
+	redirect, 
+	make_response, 
+	url_for
+)
 
 app = Flask(__name__, template_folder="./templates")
 r = RedisClient()
@@ -19,10 +27,25 @@ def auth():
 	username = data["username"]
 	password = data["password"]
 	target = data["login"]
-	print(f"{username} ;;; {password} ;;; {target}")
-	return redirect("/home/", code=200)
+
+	if target == "Login":
+		if r.checkUserExists(username):
+			if r.checkPassword(username, password):
+				return home(username)
+			else:
+				print("Invalid password")
+				return redirect(request.referrer)
+		else:
+			print("User doesn't exist")
+			return redirect(request.referrer)
+	elif target == "Register":
+		if r.checkUserExists(username):
+			return redirect(request.referrer)
+		else:
+			r.addUser(username)
+			r.addUserData(username, password)
+			return home(username)
 
 @app.route("/home/")
-def home():
-	# return "None"
-	return render_template("home.html")
+def home(username=""):
+	return render_template("home.html", name="")
