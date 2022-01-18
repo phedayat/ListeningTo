@@ -7,32 +7,50 @@
 </head>
 <body class="container-fluid bg-dark">
 	<nav class="navbar navbar-expand-md navbar-dark bg-dark">
-		<div class="container-fluid text-white">
-			<a class="navbar-brand" href="#">{{ connection }}</a>
-			<span class="navbar-text"><3</span>
-			<a class="navbar-text text-white" href="#">{{ user }}</a>
+		<div class="container-fluid text-white row">
+			<div class="col-4 text-start">
+				<a class="navbar-brand" href="#">{{ connection if connection else "Connect!" }}</a>
+			</div>
+			<div class="col-4 text-center">
+				<a class="navbar-text" href="#">&lt;3</a>
+			</div>
+			<div class="col-4 text-end">
+				<a class="navbar-text text-white" href="{{ url_for('settings', username=user) }}">{{ user }}</a>
+			</div>
 		</div>
 	</nav>
 
-	<main class="container-fluid bg-dark text-white text-center">
-		<div class="container-fluid border">
-			<div class="container-fluid">
-				<span style="border-radius: 50%; height: 100px; width: 100px; background-color: white; display: inline-block;"></span>
+	{% if not connection %}
+		<section class="container-fluid text-warning text-center">
+			<p><em>You don't have a connection yet! Set one in the settings :)</em></p>
+		</section>
+	{% endif %}
+
+	<main class="container-fluid col-7">
+		<div class="row p-4 p-md-5 mb-4 text-white container-fluid border bg-dark bg-gradient">
+			<div class="col container-fluid">
+				<img class="img-fluid border-0" src="{{ song['artwork'] if artwork in song else '' }}" alt="Album Artwork">
 			</div>
-			<div class="container-fluid">
-				<p>Song Title</p>
+			<div class="col">
+				<div class="container-fluid border-0 p-4">
+					<div class="container-fluid border text-center p-2 mb-2">
+						<p>{{ song["name"] if "name" in song else "Song Title" }}</p>						
+					</div>
+					<div class="container-fluid border text-center p-2 mt-2">
+						<p>{{ song["artist"] if "artist" in song else "Artist" }}</p>
+					</div>
+				</div>
 			</div>
 		</div>
 	</main>
 	<br>
-	<section class="container-fluid text-dark text-center">
-		<span style="border-radius: 50%; height: 200px; width: 200px; background-color: red; display: inline-block;" id="share"></span>
-	</section>
-
-	<section>
-		<form method="POST" name="connect" action="{{ url_for('connect', username=user) }}">
-			<input type="text" name="connect_target">
-			<input type="submit" name="connect_button">
-		</form>
+	<section class="container-fluid text-dark text-center col-4 text-center text-white">
+		<h3><em>Share</em></h3>
+		<div class="container-fluid mt-2 border-0">
+			<form method="POST" action="{{ url_for('share', username=user) }}">
+				<input class="form-control" type="text" name="song" placeholder="Song URL"><br>
+				<input class="btn btn-success" type="submit" name="share" value="Share">
+			</form>
+		</div>
 	</section>
 </body>
