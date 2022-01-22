@@ -1,5 +1,6 @@
 import os
 import json
+from src.postgres_controller import PostgresController
 from src.redis_client import RedisClient
 from flask import (
 	Flask, 
@@ -31,7 +32,7 @@ dictConfig({
 
 app = Flask(__name__, template_folder="./templates")
 app.secret_key = os.environ.get("SECRET_KEY")
-r = RedisClient()
+p = PostgresController()
 
 @app.route("/")
 def index():
@@ -49,8 +50,8 @@ def auth():
 	target = data["login"]
 
 	if target == "Login":
-		if r.checkUserExists(username):
-			if r.checkPassword(username, password):
+		if p.checkUserExists(username):
+			if p.checkPassword(username, password):
 				return redirect(url_for("home", username=username))
 			else:
 				flash("Invalid password")
@@ -59,27 +60,17 @@ def auth():
 			flash("User doesn't exist")
 			return redirect(request.referrer)
 	elif target == "Register":
-		if r.checkUserExists(username):
+		if p.checkUserExists(username):
 			return redirect(request.referrer)
 		else:
-			r.addUser(username)
-			r.addUserData(username, password)
+			p.insertUser(username, password)
 			return redirect(url_for("home", username=username))
 
-# @app.route("/connect")
-# def connect():
-# 	target = request.form["target_user"]
-# 	if r.checkUserExists(target):
-# 		r.setConnection(username, target)
-# 	else:
-# 		flash("User does not exist")
-# 	return redirect(request.referrer)
-
-@app.route("/home")
+@app.route("/home/")
 def home():
 	username = request.args.get("username")
-	connect = r.getConnection(username)
-	lastSong = r.getLastSong(username)
+	connect = p.getConnection(username)
+	lastSong = json.loads(p.getLastSong(username))
 	return render_template("home.html", user=username, connection=connect, song=lastSong)
 
 @app.route("/settings", methods=["GET", "POST"])
@@ -87,29 +78,27 @@ def settings():
 	username = request.args.get("username", "")
 	data = request.form
 	if "current_pass" in data:
-		pass_res = r.updatePassword(username, data["current_pass"], data["new_pass"])
-		if pass_res == 1:
+		if p.updatePassword(username, data["current_pass"], data["new_pass"]):
 			flash("Successfully changed password!")
 		else:
-			flash(f"Something went wrong, error code: {pass_res}")
+			flash(f"Something went wrong when changing password")
 	elif "target" in data:
-		connect_res = r.setConnection(username, data["target"])
-		if connect_res == 1:
+		if p.updateConnection(username, data["target"]):
 			flash("Successfully set connection!")
 		else:
-			flash(f"Something went wrong, error code: {connect_res}")
+			flash(f"Something went wrong when updating connection")
 	else:
 		app.logger.info(f"Username: {username}, Data: {data.keys()}")
-	connect = r.getConnection(username)
+	connect = p.getConnection(username)
 	return render_template("settings.html", username=username, connection=connect)
 
 @app.route("/share", methods=["GET", "POST"])
 def share():
 	username = request.args.get("username")
 	song = request.form["song"]
-	target = r.getConnection(username)
-	if r.checkUserExists(target):
-		msg = {
+	target = p.getConnection(username)
+	if p.checkUserExists(target):
+		song_obj = {
 			"url": song,
 			"name": "Am I Evil?",
 			"artist": "Diamond Head",
@@ -117,9 +106,7 @@ def share():
 			"sender": username,
 			"target": target
 		}
-		msgs = json.dumps(msg)
-		target_data = r.getUserData(target)
-		target_data["messages"].append(msgs)
-		target_data["lastSong"] = msgs
-		r.setUserData(target, target_data)
+		song_obj_string = json.dumps(song_obj)
+		p.updateSongs(username, song_obj_string)
+		p.updateLastSong(target, song_obj_string)
 		return redirect(request.referrer)

@@ -27,9 +27,9 @@
 	{% endif %}
 
 	<main class="container-fluid col-7">
-		<div class="row p-4 p-md-5 mb-4 text-white container-fluid border bg-dark bg-gradient">
+		<div class="row p-4 p-md-5 mb-4 text-white container-fluid border-0 bg-dark bg-gradient rounded-top">
 			<div class="col container-fluid">
-				<img class="img-fluid border-0" src="{{ song['artwork'] if artwork in song else '' }}" alt="Album Artwork">
+				<img class="img-fluid border-0" src="{{ song['artwork'] if 'artwork' in song else '' }}" alt="Album Artwork">
 			</div>
 			<div class="col">
 				<div class="container-fluid border-0 p-4">
