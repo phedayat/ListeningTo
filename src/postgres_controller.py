@@ -19,7 +19,7 @@ class PostgresController:
                 %s
             );
         """
-        self.cursor.execute(query, vars=(username, password, None, None, []))
+        self.cursor.execute(query, vars=(username, password, None, [], None))
         self.conn.commit()
         return 1
 
@@ -51,6 +51,14 @@ class PostgresController:
     def getLastSong(self, username):
         query = """
             SELECT lastSong FROM users
+            WHERE username = %s;
+        """
+        self.cursor.execute(query, vars=(username,))
+        return (self.cursor.fetchone())[0]
+
+    def getSongs(self, username):
+        query = """
+            SELECT songs FROM users
             WHERE username = %s;
         """
         self.cursor.execute(query, vars=(username,))

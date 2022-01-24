@@ -71,7 +71,11 @@ def auth():
 def home():
 	username = request.args.get("username")
 	connect = p.getConnection(username)
-	lastSong = json.loads(p.getLastSong(username))
+	lastSong = p.getLastSong(username)
+	if not lastSong:
+		lastSong = {}
+	else:
+		lastSong = json.loads(lastSong)
 	return render_template("home.html", user=username, connection=connect, song=lastSong)
 
 @app.route("/settings", methods=["GET", "POST"])
@@ -113,10 +117,19 @@ def share():
 			song_obj["sender"] = username
 			song_obj["target"] = target
 			song_obj_string = json.dumps(song_obj)
-			p.updateSongs(username, song_obj_string)
+			p.updateSongs(target, song_obj_string)
 			p.updateLastSong(target, song_obj_string)
 		else:
 			flash("Error sharing!")
 	else:
 		flash("You don't have a connection yet!")
 	return redirect(request.referrer)
+
+@app.route("/songs")
+def songs():
+	username = request.args.get("username")
+	connection = request.args.get("connection")
+	song_list = p.getSongs(username)
+	song_list = [json.loads(song) for song in song_list]
+	return render_template("songs.html", username=username, connection=connection, songs=song_list)
+

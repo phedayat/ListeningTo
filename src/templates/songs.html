@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Songs!</title>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+</head>
+<body class="bg-dark">
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+		<div class="container-fluid text-white row">
+			<div class="col-4 text-start">
+				<a class="navbar-brand" href="#">{{ connection if connection else "Connect!" }}</a>
+			</div>
+			<div class="col-4 text-center">
+				<a class="navbar-text" href="{{ url_for('home', username=username) }}">&lt;3</a>
+			</div>
+			<div class="col-4 text-end">
+				<a class="navbar-text text-white" href="{{ url_for('settings', username=username) }}">{{ username }}</a>
+			</div>
+		</div>
+	</nav>
+    <main class="container-fluid card-group">
+        {% for song in songs %}
+            <div class="card border-0 m-2 rounded">
+                <img class="card-img-top" src="{{ song['artwork'] if 'artwork' in song else '' }}" alt="Album Artwork">
+                <div class="card-body">
+                    <h4 class="card-title">{{ song["title"] if "title" in song else "Song Title" }}</h4>
+                    <p class="card-text">{{ song["artist"] if "artist" in song else "Artist" }}</p>
+                    <a class="card-text" href="{{ song['url'] if 'url' in song else 'Song URL' }}"><i>Open the song in Apple Music</i></a>
+                </div>
+            </div>
+        {% endfor %}
+    </main>
+</body>

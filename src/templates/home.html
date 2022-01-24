@@ -13,6 +13,7 @@
 			</div>
 			<div class="col-4 text-center">
 				<a class="navbar-text" href="#">&lt;3</a>
+				<a class="navbar-text" href="{{ url_for('songs', username=user, connection=connection) }}">My Songs</a>
 			</div>
 			<div class="col-4 text-end">
 				<a class="navbar-text text-white" href="{{ url_for('settings', username=user) }}">{{ user }}</a>
