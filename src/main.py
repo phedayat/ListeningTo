@@ -1,5 +1,6 @@
 import os
 import json
+from src.url_parser import URLParser
 from src.postgres_controller import PostgresController
 from src.redis_client import RedisClient
 from flask import (
@@ -66,7 +67,7 @@ def auth():
 			p.insertUser(username, password)
 			return redirect(url_for("home", username=username))
 
-@app.route("/home/")
+@app.route("/home")
 def home():
 	username = request.args.get("username")
 	connect = p.getConnection(username)
@@ -83,10 +84,13 @@ def settings():
 		else:
 			flash(f"Something went wrong when changing password")
 	elif "target" in data:
-		if p.updateConnection(username, data["target"]):
-			flash("Successfully set connection!")
+		if p.getConnection(data["target"]):
+			flash("User already has a connection! Ask them to unset first.")
 		else:
-			flash(f"Something went wrong when updating connection")
+			if p.updateConnection(username, data["target"]):
+				flash("Successfully set connection!")
+			else:
+				flash("User doesn't exist for connecting!")
 	else:
 		app.logger.info(f"Username: {username}, Data: {data.keys()}")
 	connect = p.getConnection(username)
@@ -94,19 +98,21 @@ def settings():
 
 @app.route("/share", methods=["GET", "POST"])
 def share():
-	username = request.args.get("username")
+	username = request.args.get("username", "")
 	song = request.form["song"]
 	target = p.getConnection(username)
-	if p.checkUserExists(target):
-		song_obj = {
-			"url": song,
-			"name": "Am I Evil?",
-			"artist": "Diamond Head",
-			"artwork": "https://zrockr.com/user-files/uploads/2016/03/401_logo.png",
-			"sender": username,
-			"target": target
-		}
-		song_obj_string = json.dumps(song_obj)
-		p.updateSongs(username, song_obj_string)
-		p.updateLastSong(target, song_obj_string)
-		return redirect(request.referrer)
+	if target:
+		parser = URLParser(song)
+		song_obj = parser.process()
+		app.logger.info(f"Song_obj: {song_obj}")
+		if song_obj:
+			song_obj["sender"] = username
+			song_obj["target"] = target
+			song_obj_string = json.dumps(song_obj)
+			p.updateSongs(username, song_obj_string)
+			p.updateLastSong(target, song_obj_string)
+		else:
+			flash("Error sharing!")
+	else:
+		flash("You don't have a connection yet!")
+	return redirect(request.referrer)

@@ -4,7 +4,9 @@ import os
 
 class PostgresController:
     def __init__(self) -> None:
+        # self.DATABASE_URL = "postgres://isbyzwksoaqibt:d268f7f77f51d7a4e846ac819d2c7397de5b035b3a5a49288b26aa6ba47cc3b2@ec2-54-160-96-70.compute-1.amazonaws.com:5432/dcs5eanfbcbq39"
         self.conn = post.connect(os.environ.get("DATABASE_URL"), sslmode="require")
+        # self.conn = post.connect(self.DATABASE_URL, sslmode="require")
         self.cursor = self.conn.cursor()
 
     def insertUser(self, username, password):
@@ -43,7 +45,8 @@ class PostgresController:
             WHERE username = %s;
         """
         self.cursor.execute(query, vars=(username,))
-        return (self.cursor.fetchone())[0]
+        res = self.cursor.fetchone()
+        return res[0] if res else 0
 
     def getLastSong(self, username):
         query = """
@@ -124,8 +127,10 @@ class PostgresController:
 
 if __name__=="__main__":
     p = PostgresController()
-    print(p.insertUser("parsia", "12345"))
-    print(p.insertUser("jack", "67890"))
+    # print(p.insertUser("parsia", "12345"))
+    # print(p.insertUser("jack", "67890"))
+    print(p.getConnection("parsia"))
+    # print(p.getUser("parsia"))
     # print(p.getUser("parsia"))
     # print(p.getUser("jack"))
     # print(p.checkPassword("parsia", "67890"))

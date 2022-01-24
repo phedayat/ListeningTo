@@ -33,11 +33,14 @@
 			</div>
 			<div class="col">
 				<div class="container-fluid border-0 p-4">
-					<div class="container-fluid border text-center p-2 mb-2">
-						<p>{{ song["name"] if "name" in song else "Song Title" }}</p>						
+					<div class="container-fluid text-center p-2 mb-2">
+						<h4>{{ song["title"] if "title" in song else "Song Title" }}</h4>
 					</div>
-					<div class="container-fluid border text-center p-2 mt-2">
+					<div class="container-fluid text-center p-2 mt-2">
 						<p>{{ song["artist"] if "artist" in song else "Artist" }}</p>
+					</div>
+					<div class="container-fluid text-center p-2 mt-2">
+						<a href="{{ song['url'] if 'url' in song else 'Song URL' }}"><i>Open the song in Apple Music</i></a>
 					</div>
 				</div>
 			</div>
