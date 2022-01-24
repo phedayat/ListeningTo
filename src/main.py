@@ -78,11 +78,15 @@ def home():
 def settings():
 	username = request.args.get("username", "")
 	data = request.form
+	app.logger.info(data.keys())
 	if "current_pass" in data:
 		if p.updatePassword(username, data["current_pass"], data["new_pass"]):
 			flash("Successfully changed password!")
 		else:
 			flash(f"Something went wrong when changing password")
+	elif "unset_connection" in data:
+		if p.updateConnection(username, "*"):
+			flash("Successfully unset connection!")
 	elif "target" in data:
 		if p.getConnection(data["target"]):
 			flash("User already has a connection! Ask them to unset first.")

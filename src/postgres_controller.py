@@ -74,15 +74,24 @@ class PostgresController:
         return True if self.cursor.fetchone() else False
 
     def updateConnection(self, sender, target):
-        if self.checkUserExists(target):
+        if target == "*":
             query = """
-                UPDATE users SET connection = %s WHERE username = %s;
-                UPDATE users SET connection = %s WHERE username = %s;
+                UPDATE users SET connection = NULL WHERE username = %s;
             """
-            self.cursor.execute(query, vars=(target, sender, sender, target))
+            self.cursor.execute(query, vars=(sender,))
             self.conn.commit()
-            return 1
-        return 0
+            return 2
+        else:
+            if self.checkUserExists(target):
+                query = """
+                    UPDATE users SET connection = %s WHERE username = %s;
+                    UPDATE users SET connection = %s WHERE username = %s;
+                """
+                self.cursor.execute(query, vars=(target, sender, sender, target))
+                self.conn.commit()
+                return 1
+            return 0
+
 
     def updatePassword(self, username, curr_pass, new_pass):
         if self.checkPassword(username, curr_pass):

@@ -23,17 +23,16 @@ class URLParser:
             "limit": 20
         }
         res = request("GET", self.endpoint, params=req_params, headers=self.headers)
-        return self.processResponse(res.json(), True if "single" in self.url else False)
+        self.processResponse(res.json(), True if "single" in self.url else False)
+        return self.song
 
     def processResponse(self, res, single):
         hits = res["tracks"]["hits"]
         for track_obj in hits:
             track = track_obj["track"]
             if single:
-                stripped_title = re.compile("[,\.!?']").sub("", track["title"]).lower().strip()
-                print(f"Srtipped title: {stripped_title}")
-                print(f"Album: {self.song['album']}")
-                print(stripped_title == self.song["album"])
+                title = track["title"].strip().lower()
+                stripped_title = re.compile("[,\.!?']").sub("", title).casefold()
                 if stripped_title == self.song["album"]:
                     self.song["artwork"] = track["images"]["coverart"]
                     self.song["title"] = track["title"]
@@ -59,8 +58,8 @@ class URLParser:
             album_name = album_name.replace("single", "")
             print(album_name)
         song_id = (url[0].split("="))[1]
-        self.song["songId"] = song_id
-        self.song["album"] = album_name
+        self.song["songId"] = song_id.strip()
+        self.song["album"] = album_name.strip()
         return album_name
 
 if __name__=="__main__":
